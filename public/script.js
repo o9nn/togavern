@@ -144,6 +144,16 @@ export var top_k_ollama = 0;
 export var amount_gen_ollama = 400; // max_tokens for Ollama
 export var max_context_ollama = 4096; // context size for Ollama
 // Add other Ollama specific parameters here if needed
+// Togai settings
+export var api_url_togai = "https://api.togai.ai/v1"; // Default Togai API URL
+export var api_key_togai = ""; // Togai API key
+export var model_togai = "gpt-4o"; // Default Togai model
+export var temp_togai = 0.7;
+export var top_p_togai = 1.0;
+export var pres_pen_togai = 0.0;
+export var freq_pen_togai = 0.0;
+export var amount_gen_togai = 220;
+export var max_context_togai = 8192;
 
 Tavern.hordeCheck = false;
 Tavern.is_send_press = false; //Send generation
@@ -614,12 +624,14 @@ $(document).ready(function(){
     var is_get_status_claude = false;
     var is_get_status_webui = false;
     var is_get_status_ollama = false; // For Ollama status check
+    var is_get_status_togai = false; // For Togai status check
     var is_api_button_press = false;
     var is_api_button_press_novel = false;
     var is_api_button_press_openai = false;
     var is_api_button_press_webui = false;
     var is_api_button_press_claude = false;
     var is_api_button_press_ollama = false; // For Ollama API button press
+    var is_api_button_press_togai = false; // For Togai API button press
     var add_mes_without_animation = false;
     var this_del_mes = 0;
     var this_edit_mes_text = '';
@@ -796,12 +808,15 @@ $(document).ready(function(){
             $("#online_status_text_claude").html("No connection...");
             $("#online_status_indicator_ollama").css("background-color", "red"); // Ollama
             $("#online_status_text_ollama").html("No connection..."); // Ollama
+            $("#online_status_indicator_togai").css("background-color", "red"); // Togai
+            $("#online_status_text_togai").html("No connection..."); // Togai
             is_get_status = false;
             is_get_status_novel = false;
             is_get_status_openai = false;
             is_get_status_webui = false;
             is_get_status_claude = false;
             is_get_status_ollama = false; // Ollama
+            is_get_status_togai = false; // Togai
         }else{
             $("#online_status_indicator").removeClass('online_status_indicator_offline');
             $("#online_status_indicator2").removeClass('online_status_indicator_offline');
@@ -925,7 +940,7 @@ $(document).ready(function(){
                 }
             });
         }else{
-            if(is_get_status_novel != true && is_get_status_openai != true && is_get_status_webui != true && is_get_status_claude != true && is_get_status_ollama != true){
+            if(is_get_status_novel != true && is_get_status_openai != true && is_get_status_webui != true && is_get_status_claude != true && is_get_status_ollama != true && is_get_status_togai != true){
                 online_status = 'no_connection';
             }
         }
@@ -981,7 +996,7 @@ $(document).ready(function(){
                 }
             });
         }else{
-            if(is_get_status_novel != true && is_get_status_openai != true && is_get_status != true && is_get_status_claude != true && is_get_status_ollama != true){
+            if(is_get_status_novel != true && is_get_status_openai != true && is_get_status != true && is_get_status_claude != true && is_get_status_ollama != true && is_get_status_togai != true){
                 online_status = 'no_connection';
             }
         }
@@ -1696,6 +1711,7 @@ $(document).ready(function(){
             }
             if(main_api == 'openai' || main_api == 'proxy') this_max_context = max_context_openai;
             if(main_api == 'claude') this_max_context = 100000;
+            if(main_api == 'togai') this_max_context = max_context_togai;
             var i = 0;
             let mesExmString = '';
             count_exm_add = 0;
@@ -1879,7 +1895,7 @@ $(document).ready(function(){
                 }else{
                     mesSendString = '\n'+mesSendString;
                 }
-                if(((main_api === 'openai' || main_api === 'proxy') && isOpenAIChatModel()) || main_api === 'claude' || main_api === 'ollama'){
+                if(((main_api === 'openai' || main_api === 'proxy') && isOpenAIChatModel()) || main_api === 'claude' || main_api === 'ollama' || main_api === 'togai'){
                     
                     let system_role_name = 'system';
                     let system_prompt_role_name = 'system';
@@ -2223,6 +2239,19 @@ $(document).ready(function(){
                         top_k: parseInt(top_k_ollama),
                         max_tokens: parseInt(amount_gen_ollama)
                         // Add other necessary parameters for Ollama
+                    };
+                }
+                if(main_api === 'togai'){
+                    generate_url = '/generate_togai';
+                    generate_data = {
+                        messages: finalPromt,
+                        model: model_togai,
+                        temperature: parseFloat(temp_togai),
+                        top_p: parseFloat(top_p_togai),
+                        presence_penalty: parseFloat(pres_pen_togai),
+                        frequency_penalty: parseFloat(freq_pen_togai),
+                        max_tokens: parseInt(amount_gen_togai),
+                        stop: []
                     };
                 }
                 jQuery.ajax({
@@ -4080,6 +4109,7 @@ $(document).ready(function(){
         is_get_status_webui = false;
         is_get_status_claude = false;
         is_get_status_ollama = false;
+        is_get_status_togai = false;
         online_status = 'no_connection';
         checkOnlineStatus();
         changeMainAPI();
@@ -4099,6 +4129,7 @@ $(document).ready(function(){
         $('#horde_api').css("display", "none");
         $('#webui_api').css("display", "none");
         $('#claude_api').css("display", "none");
+        $('#togai_api').css("display", "none");
         $('#master_settings_novelai_block').css("display", "none");
         $('#master_settings_openai_block').css("display", "none");
         //$('#system_prompt_block').css("display", "none");
@@ -4204,6 +4235,13 @@ $(document).ready(function(){
             if (auto_connect || !is_get_status_ollama) {
                 setTimeout(function () { $('#api_button_ollama').click(); }, 100); // Add a small delay
             }
+        }
+        //Togai
+        if ($('#main_api').find(":selected").val() == 'togai') {
+            $('#togai_api').css("display", "block");
+            main_api = 'togai';
+            $('#api_url_togai').val(api_url_togai);
+            $('#api_key_togai').val(api_key_togai);
         }
     }
     async function getUserAvatars(){
@@ -5101,6 +5139,46 @@ $(document).ready(function(){
                     $('#max_context_ollama').val(max_context_ollama);
                     $('#max_context_counter_ollama').html(max_context_ollama + ' Tokens');
 
+                    // Load Togai settings
+                    if(settings.api_url_togai !== undefined && settings.api_url_togai.trim() !== '') {
+                        api_url_togai = settings.api_url_togai.trim();
+                    } else {
+                        api_url_togai = "https://api.togai.ai/v1";
+                    }
+                    $('#api_url_togai').val(api_url_togai);
+
+                    if(settings.api_key_togai !== undefined) {
+                        api_key_togai = settings.api_key_togai;
+                        $('#api_key_togai').val(api_key_togai);
+                    }
+
+                    if(settings.model_togai !== undefined) {
+                        model_togai = settings.model_togai;
+                        $('#togai_model_select').val(model_togai);
+                    }
+
+                    temp_togai = parseFloat(settings.temp_togai);
+                    if(isNaN(temp_togai)) temp_togai = 0.7;
+                    $('#temp_togai').val(temp_togai);
+                    $('#temp_counter_togai').html(temp_togai);
+
+                    top_p_togai = parseFloat(settings.top_p_togai);
+                    if(isNaN(top_p_togai)) top_p_togai = 1.0;
+
+                    pres_pen_togai = parseFloat(settings.pres_pen_togai);
+                    if(isNaN(pres_pen_togai)) pres_pen_togai = 0.0;
+
+                    freq_pen_togai = parseFloat(settings.freq_pen_togai);
+                    if(isNaN(freq_pen_togai)) freq_pen_togai = 0.0;
+
+                    amount_gen_togai = parseInt(settings.amount_gen_togai);
+                    if(isNaN(amount_gen_togai)) amount_gen_togai = 220;
+                    $('#amount_gen_togai').val(amount_gen_togai);
+                    $('#amount_gen_counter_togai').html(amount_gen_togai + ' Tokens');
+
+                    max_context_togai = parseInt(settings.max_context_togai);
+                    if(isNaN(max_context_togai)) max_context_togai = 8192;
+
                     //TavernAI master settings
 
 
@@ -5395,6 +5473,16 @@ $(document).ready(function(){
                     top_k_ollama: parseInt(top_k_ollama) || 0,   // Ensure int, provide default
                     amount_gen_ollama: parseInt(amount_gen_ollama) || 400, // Ensure int, provide default
                     max_context_ollama: parseInt(max_context_ollama) || 4096, // Ensure int, provide default
+                    // Togai settings to save
+                    api_url_togai: api_url_togai,
+                    api_key_togai: api_key_togai,
+                    model_togai: model_togai,
+                    temp_togai: parseFloat(temp_togai) || 0.7,
+                    top_p_togai: parseFloat(top_p_togai) || 1.0,
+                    pres_pen_togai: parseFloat(pres_pen_togai) || 0.0,
+                    freq_pen_togai: parseFloat(freq_pen_togai) || 0.0,
+                    amount_gen_togai: parseInt(amount_gen_togai) || 220,
+                    max_context_togai: parseInt(max_context_togai) || 8192,
                     character_sorting_type: character_sorting_type
                     }),
             beforeSend: function(){
@@ -6741,6 +6829,65 @@ $(document).ready(function(){
         $("#api_button_ollama").css("display", 'inline-block');
     }
 
+    // Togai API status check
+    async function getStatusTogai() {
+        if (is_get_status_togai) {
+            const current_api_url_togai = ($('#api_url_togai').val() && $('#api_url_togai').val().trim() !== '') ? $('#api_url_togai').val().trim() : api_togai;
+            const current_api_key_togai = $('#api_key_togai').val() ? $('#api_key_togai').val().trim() : "";
+            jQuery.ajax({
+                type: 'POST',
+                url: '/getstatus_togai',
+                data: JSON.stringify({ 
+                    url: current_api_url_togai,
+                    key: current_api_key_togai
+                }),
+                beforeSend: function () {
+                    // Visual feedback for API button press
+                },
+                cache: false,
+                timeout: requestTimeout,
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    resultCheckStatusTogai(data);
+                    if (online_status !== 'no_connection') {
+                        setTimeout(getStatusTogai, 5000); // Poll every 5 seconds
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    console.log(exception);
+                    console.log(jqXHR);
+                    online_status = 'no_connection';
+                    resultCheckStatusTogai({ error: true, error_message: "Connection failed or server error." });
+                }
+            });
+        } else {
+            if (!is_get_status_novel && !is_get_status_openai && !is_get_status_webui && !is_get_status_claude && !is_get_status && !is_get_status_ollama) {
+                online_status = 'no_connection';
+            }
+        }
+    }
+
+    function resultCheckStatusTogai(data) {
+        is_api_button_press_togai = false;
+        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+            online_status = "Connected";
+            $("#online_status_indicator_togai").removeClass('online_status_indicator_offline').addClass('online_status_indicator_online');
+            $("#online_status_text_togai").html(`Connected. Using model: ${model_togai}`);
+        } else if (data && data.error) {
+            online_status = 'no_connection';
+            $("#online_status_indicator_togai").removeClass('online_status_indicator_online').addClass('online_status_indicator_offline');
+            $("#online_status_text_togai").html(data.error_message || "Error connecting to Togai.");
+        } else {
+            online_status = 'no_connection';
+            $("#online_status_indicator_togai").removeClass('online_status_indicator_online').addClass('online_status_indicator_offline');
+            $("#online_status_text_togai").html("No connection.");
+        }
+        checkOnlineStatus();
+        $("#api_loading_togai").css("display", 'none');
+        $("#api_button_togai").css("display", 'inline-block');
+    }
+
     // Add a click handler for the Ollama API button, similar to other APIs
     $("#api_button_ollama").click(function () {
         const urlInput = $('#api_url_ollama').val();
@@ -6778,6 +6925,49 @@ $(document).ready(function(){
             $('#amount_gen_counter_ollama').html(amount_gen_ollama + ' Tokens');
             saveSettings();
         });
+
+    // Togai API button handler
+    $("#api_button_togai").click(function () {
+        const urlInput = $('#api_url_togai').val();
+        const keyInput = $('#api_key_togai').val();
+        if (urlInput && urlInput.trim() !== '') {
+            $("#api_loading_togai").css("display", 'inline-block');
+            $("#api_button_togai").css("display", 'none');
+            api_url_togai = urlInput.trim();
+            api_key_togai = keyInput.trim();
+            saveSettings();
+
+            is_get_status_togai = true;
+            is_api_button_press_togai = true;
+            getStatusTogai();
+        } else {
+            $("#online_status_indicator_togai").removeClass('online_status_indicator_online').addClass('online_status_indicator_offline');
+            $("#online_status_text_togai").html("Togai API URL cannot be empty.");
+        }
+    });
+    // Togai config listeners
+    $('#temp_togai')
+        .on('input', function() {
+            $('#temp_counter_togai').html(temp_togai);
+        })
+        .change(function() {
+            temp_togai = parseFloat($('#temp_togai').val());
+            $('#temp_counter_togai').html(temp_togai);
+            saveSettings();
+        });
+    $('#amount_gen_togai')
+        .on('input', function() {
+            $('#amount_gen_counter_togai').html(amount_gen_togai + ' Tokens');
+        })
+        .change(function() {
+            amount_gen_togai = parseInt($('#amount_gen_togai').val());
+            $('#amount_gen_counter_togai').html(amount_gen_togai + ' Tokens');
+            saveSettings();
+        });
+    $('#togai_model_select').change(function(){
+        model_togai = $('#togai_model_select').find(":selected").val();
+        saveSettings();
+    });
 
 //**************************CHAT IMPORT EXPORT*************************//
     $( "#chat_import_button" ).click(function() {

@@ -73,6 +73,7 @@ const api_novelai = "https://api.novelai.net";
 const api_openai = "https://api.openai.com/v1";
 const api_horde = "https://stablehorde.net/api";
 const api_ollama = "http://127.0.0.1:11434"; // Default Ollama API URL
+const api_togai = "https://api.togai.ai/v1"; // Default Togai API URL
 var hordeActive = false;
 var hordeQueue;
 var hordeData = {};
@@ -83,6 +84,7 @@ var response_generate;
 var response_generate_novel;
 var response_generate_openai;
 var response_generate_claude;
+var response_generate_togai;
 var request_promt;
 var response_promt;
 var response_characloud_loadcard;
@@ -96,11 +98,14 @@ var response_getstatus_novel;
 var response_getstatus_openai;
 var response_getstatus_claude;
 var response_getstatus_ollama;
+var response_getstatus_togai;
 var response_getlastversion;
 var api_key_novel;
 var api_key_openai;
 var api_key_claude;
+var api_key_togai;
 var api_url_openai;
+var api_url_togai;
 var model_ollama; // Variable to store Ollama model name
 var is_colab = false;
 var charactersPath = 'public/characters/';
@@ -2114,6 +2119,120 @@ app.post("/getstatus_ollama", jsonParser, function(request, response_getstatus_o
         }
     }).on('error', function (err) {
         response_getstatus_ollama_func.send({error: true, error_message: "Unspecified error while sending the request to Ollama.\n" + err});
+    });
+});
+
+//***********Togai API
+app.post("/getstatus_togai", jsonParser, function(request, response_getstatus_togai){
+    if(!request.body) return response_getstatus_togai.sendStatus(400);
+    api_key_togai = request.body.key;
+    api_url_togai = request.body.url || api_togai;
+    if(api_url_togai.indexOf('localhost') != -1){
+        api_url_togai = api_url_togai.replace('localhost','127.0.0.1');
+    }
+    var args = {};
+    if(api_key_togai && api_key_togai.length) {
+        args = {
+            headers: {"Authorization": "Bearer " + api_key_togai}
+        };
+    }
+    client.get(api_url_togai+"/models", args, function (data, response) {
+        if(response.statusCode == 200){
+            response_getstatus_togai.send(data);
+        }
+        if(response.statusCode == 401){
+            console.log('Invalid Authentication');
+            response_getstatus_togai.send({error: true, error_message: "Invalid Authentication."});
+        }
+        if(response.statusCode == 429){
+            console.log('Rate limit reached for requests');
+            response_getstatus_togai.send({error: true, error_message: "Rate limit reached for requests."});
+        }
+        if(response.statusCode == 500){
+            console.log('The server had an error while processing your request');
+            response_getstatus_togai.send({error: true, error_message: "The server had an error while processing your request."});
+        }
+    }).on('error', function (err) {
+        response_getstatus_togai.send({error: true, error_message: "Unspecified error while sending the request.\n" + err});
+    });
+});
+
+app.post("/generate_togai", jsonParser, function(request, response_generate_togai){
+    if(!request.body) return response_generate_togai.sendStatus(400);
+    console.log(request.body);
+    var data = {
+        "model": request.body.model,
+        "max_tokens": request.body.max_tokens,
+        "temperature": request.body.temperature,
+        "top_p": request.body.top_p,
+        "presence_penalty": request.body.presence_penalty,
+        "frequency_penalty": request.body.frequency_penalty,
+        "stop": request.body.stop,
+        "messages": request.body.messages
+    };
+    
+    let args = {};
+    if(api_key_togai && api_key_togai.length){
+        args = {
+            data: data,
+            headers: {"Content-Type": "application/json", "Authorization": "Bearer " + api_key_togai},
+            requestConfig: {
+                timeout: connectionTimeoutMS
+            }
+        };
+    }else{
+        args = {
+            data: data,
+            headers: {"Content-Type": "application/json"},
+            requestConfig: {
+                timeout: connectionTimeoutMS
+            }
+        };
+    }
+    client.post(api_url_togai+"/chat/completions",args, function (data, response) {
+        try {
+            console.log(data);
+            if(!data.choices || !data.choices[0]) {
+                let message = null;
+                let code = null;
+                if(data.error) {
+                    message = data.error.message;
+                    code = data.error.type;
+                }
+                response_generate_togai.send({ error: true, error_message: message, error_code: code });
+                return;
+            }
+            if(data.choices[0].message !== undefined){
+                console.log(data.choices[0].message);
+            }
+            console.log(response.statusCode);
+            if(response.statusCode <= 299){
+                return response_generate_togai.send(data);
+            }
+            if(response.statusCode == 401){
+                console.log('Invalid Authentication');
+                return response_generate_togai.send({error: true, error_code: 401, error_message: "Invalid Authentication"});
+            }
+            if(response.statusCode == 404){
+                console.log('Model not found');
+                return response_generate_togai.send({error: true, error_code: 404, error_message: "Model not found"});
+            }
+            if(response.statusCode == 429){
+                console.log('Rate limit reached for requests');
+                return response_generate_togai.send({error: true, error_code: 429, error_message: "Rate limit reached for requests"});
+            }
+            if(response.statusCode == 500){
+                console.log('The server had an error while processing your request');
+                return response_generate_togai.send({error: true, error_code: 500, error_message: "The server had an error while processing your request"});
+            }
+            console.log('Unique error');
+            return response_generate_togai.send({error: true, error_code: response.statusCode, error_message: "Unique error"});
+        }catch (error) {
+            console.log("An error occurred: " + error);
+            response_generate_togai.send({error: true, error_message: error});
+        }
+    }).on('error', function (err) {
+        response_generate_togai.send({error: true, error_message: "Unspecified error while sending the request.\n" + err});
     });
 });
 
