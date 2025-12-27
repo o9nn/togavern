@@ -6862,7 +6862,7 @@ $(document).ready(function(){
                 }
             });
         } else {
-            if (!is_get_status_novel && !is_get_status_openai && !is_get_status_webui && !is_get_status_claude && !is_get_status && !is_get_status_ollama) {
+            if (!is_get_status_novel && !is_get_status_openai && !is_get_status_webui && !is_get_status_claude && !is_get_status && !is_get_status_ollama && !is_get_status_togai) {
                 online_status = 'no_connection';
             }
         }
