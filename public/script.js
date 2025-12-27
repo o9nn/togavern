@@ -6948,7 +6948,7 @@ $(document).ready(function(){
     // Togai config listeners
     $('#temp_togai')
         .on('input', function() {
-            $('#temp_counter_togai').html(temp_togai);
+            $('#temp_counter_togai').html(parseFloat($('#temp_togai').val()));
         })
         .change(function() {
             temp_togai = parseFloat($('#temp_togai').val());
@@ -6957,7 +6957,7 @@ $(document).ready(function(){
         });
     $('#amount_gen_togai')
         .on('input', function() {
-            $('#amount_gen_counter_togai').html(amount_gen_togai + ' Tokens');
+            $('#amount_gen_counter_togai').html(parseInt($('#amount_gen_togai').val()) + ' Tokens');
         })
         .change(function() {
             amount_gen_togai = parseInt($('#amount_gen_togai').val());
