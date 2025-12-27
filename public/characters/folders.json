@@ -1,0 +1,20 @@
+{
+  "children": [
+    {
+      "name": "Aqua",
+      "uid": "Aqua.png"
+    },
+    {
+      "name": "City Explorer (Story)",
+      "uid": "City Explorer (Story).png"
+    },
+    {
+      "name": "Darkness",
+      "uid": "Darkness.png"
+    },
+    {
+      "name": "Megumin",
+      "uid": "Megumin.png"
+    }
+  ]
+}

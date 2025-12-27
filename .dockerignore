@@ -1,0 +1,7 @@
+node_modules
+npm-debug.log
+readme*
+Start.bat
+Start.ps1
+TAVERN_CONSOLE.lnk
+CONSOLE.lnk
