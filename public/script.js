@@ -1055,7 +1055,7 @@ $(document).ready(function(){
                 }
             });
         }else{
-            if(!is_get_status_novel && !is_get_status_webui && !is_get_status_claude && !is_get_status_openai && !is_get_status_ollama){
+            if(!is_get_status_novel && !is_get_status_webui && !is_get_status_claude && !is_get_status_openai && !is_get_status_ollama && !is_get_status_togai){
                 online_status = 'no_connection';
             }
         }
@@ -6832,7 +6832,7 @@ $(document).ready(function(){
     // Togai API status check
     async function getStatusTogai() {
         if (is_get_status_togai) {
-            const current_api_url_togai = ($('#api_url_togai').val() && $('#api_url_togai').val().trim() !== '') ? $('#api_url_togai').val().trim() : api_togai;
+            const current_api_url_togai = ($('#api_url_togai').val() && $('#api_url_togai').val().trim() !== '') ? $('#api_url_togai').val().trim() : "https://api.togai.ai/v1";
             const current_api_key_togai = $('#api_key_togai').val() ? $('#api_key_togai').val().trim() : "";
             jQuery.ajax({
                 type: 'POST',
