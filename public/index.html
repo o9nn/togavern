@@ -652,6 +652,7 @@
                 <option value="novel">NovelAI</option>
                 <option value="openai">OpenAI</option>
                 <option value="claude">ClaudeAI</option>
+                <option value="togai">Togai</option>
                 <option value="proxy">Reverse Proxy</option>
                 <option value="webui">Text generation web UI</option>
                 <option value="ollama">Ollama</option>
@@ -870,6 +871,32 @@
                     <input type="range" id="temp_ollama" name="volume" min="0.0" max="2.0" step="0.01" value="0.7">
                     <h4 class="h4_menu_title">Amount of generation </h4><h5 id="amount_gen_counter_ollama" class="range_counter">400 Tokens</h5>
                     <input type="range" id="amount_gen_ollama" name="volume" min="16" max="2048" step="16" value="400">
+                </div>
+            </div>
+            <div id="togai_api" style="display: none;">
+                <div id="togai_api_logo"><a href="https://togai.ai/" target="_blank">Togai</a></div>
+                <form action="javascript:void(null);" method="post" enctype="multipart/form-data" id="togai_auth">
+                    <h4 class="h4_menu_title">API URL</h4><h5 class="h5_menu_help">Default: https://api.togai.ai/v1</h5>
+                    <input id="api_url_togai" name="api_url_togai" class="text_pole" type="text" maxlength="500" size="35" value="https://api.togai.ai/v1" autocomplete="off">
+                    <h4 class="h4_menu_title">API Key</h4><h5 class="h5_menu_help">Your Togai API key</h5>
+                    <input id="api_key_togai" name="api_key_togai" class="text_pole" type="password" maxlength="500" size="35" value="" autocomplete="off" placeholder="API key">
+                    <input id="api_button_togai" type="submit" value="Connect">
+                    <img id="api_loading_togai" src="img/load.svg" style="display: none;">
+                </form>
+                <div id="online_status_togai">
+                    <div id="online_status_indicator_togai" class="online_status_indicator_offline"></div><div id="online_status_text_togai">No connection...</div>
+                </div>
+                <h4 class="h4_menu_title">Model</h4><h5 class="h5_menu_help">Select Togai model</h5>
+                <select id="togai_model_select" class="menu_select">
+                    <option value="gpt-4o">gpt-4o</option>
+                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                </select>
+                <div id="range_block_togai">
+                    <h4 class="h4_menu_title">Temperature </h4><h5 id="temp_counter_togai" class="range_counter">0.7</h5>
+                    <input type="range" id="temp_togai" name="volume" min="0.0" max="2.0" step="0.01" value="0.7">
+                    <h4 class="h4_menu_title">Amount of generation </h4><h5 id="amount_gen_counter_togai" class="range_counter">220 Tokens</h5>
+                    <input type="range" id="amount_gen_togai" name="volume" min="16" max="2048" step="16" value="220">
                 </div>
             </div>
             <div id="additional_menu_settings">
